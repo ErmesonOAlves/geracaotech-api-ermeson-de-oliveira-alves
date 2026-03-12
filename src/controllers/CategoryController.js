@@ -1,5 +1,5 @@
 import Category from '../models/Category.js'
-import {Op} from 'sequelize'
+import { Op } from 'sequelize'
 export const search = async (req, res) => {
   try {
 
@@ -14,10 +14,10 @@ export const search = async (req, res) => {
       })
     }
 
- const options = {
-            attributes:['id','name','slug','use_in_menu'],
-            order:[['id','ASC']]
-        };
+    const options = {
+      attributes: ['id', 'name', 'slug', 'use_in_menu'],
+      order: [['id', 'ASC']]
+    };
     if (fields) {
       options.attributes = fields.split(',')
     }
@@ -53,11 +53,11 @@ export const search = async (req, res) => {
 export const getById = async (req, res) => {
   try {
     const { id } = req.params;
-     if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
-            return res.status(400).json({
-                message: "Invalid ID"
-            })
-        }
+    if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        message: "Invalid ID"
+      })
+    }
     const category = await Category.findByPk(id, {
       attributes: ['id', 'name', 'slug', 'use_in_menu']
     })
@@ -69,7 +69,7 @@ export const getById = async (req, res) => {
     return res.status(200).json(category)
   } catch (error) {
     return res.status(500).json({
-      message:`server internal error`
+      message: `server internal error`
     })
   }
 }
@@ -83,22 +83,22 @@ export const create = async (req, res) => {
       })
     }
     if (name.trim().length < 2 || slug.trim().length < 2) {
-                return res.status(400).json({
-                    message: "name and slug must be at least 2 characters"
-                })
-            }
-            const existingCategory = await Category.findOne({
-              where:{[Op.or]:[{name},{slug}]}
-            })
-            if (existingCategory) {
-                return res.status(409).json({
-                    message: "Category name or slug already exists"
-                })
-            }
+      return res.status(400).json({
+        message: "name and slug must be at least 2 characters"
+      })
+    }
+    const existingCategory = await Category.findOne({
+      where: { [Op.or]: [{ name }, { slug }] }
+    })
+    if (existingCategory) {
+      return res.status(409).json({
+        message: "Category name or slug already exists"
+      })
+    }
 
     const category = await Category.create({
-      name:name.trim(),
-      slug:slug.trim(),
+      name: name.trim(),
+      slug: slug.trim(),
       use_in_menu
     })
 
@@ -115,16 +115,33 @@ export const update = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, slug, use_in_menu } = req.body;
+    if (!name|| name.trim().length < 2) {
+      return res.status(400).json({
+        message: 'validation failed: name is a required field for update'
+      })
+    }
+    if (!slug|| slug.trim().length < 2) {
+      return res.status(400).json({
+        message: "Validation failed: 'slug' is a required field for updates."
+      });
+    }
+    if (name.trim().length < 2 || slug.trim().length < 2) {
+      return res.status(400).json({
+        message: "name and slug must be at least 2 characters"
+      })
+    }
     const category = await Category.findByPk(id);
     if (!category) {
       return res.status(404).json({
         message: "category not found"
       })
     }
+
+
     await category.update({ name, slug, use_in_menu })
     return res.status(204).send();
   } catch (error) {
-    return res.status(400).json({
+    return res.status(500).json({
       message: `Update failed, verify the error message`,
       error: error.message
     })

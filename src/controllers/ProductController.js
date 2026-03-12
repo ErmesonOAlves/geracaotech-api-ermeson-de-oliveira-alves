@@ -11,7 +11,11 @@ export const create = async (req, res) => {
             enabled, name, slug, stock, description, price,
             price_with_discount, category_ids, images, options
         } = req.body;
-
+        if(!name||!slug||!price||!price_with_discount){
+            return res.status(400).json({
+                message:`All fields are required`
+            })
+        }
         const product = await Product.create({
             enabled,
             name,
@@ -186,6 +190,11 @@ export const search = async (req, res) => {
 export const getById = async (req, res) => {
     try {
         const { id } = req.params;
+        if (!Number.isInteger(Number(id)) || Number(id) <= 0) {
+      return res.status(400).json({
+        message: "Invalid ID"
+      })
+    }
         const product = await Product.findByPk(id, {
             attributes: {
                 exclude:
@@ -246,6 +255,11 @@ export const update = async (req, res) => {
             enabled, name, slug, stock, description, price,
             price_with_discount, category_ids, images, options
         } = req.body;
+        if(!name||!slug||!price||!price_with_discount){
+            return res.status(400).json({
+                message:`All fields are required`
+            })
+        }
         if (category_ids && category_ids.length > 0) {
             const existingCategories = await Category.findAll({
                 where: {
