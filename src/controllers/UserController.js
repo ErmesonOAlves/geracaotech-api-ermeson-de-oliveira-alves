@@ -3,7 +3,32 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 import { hashPassword, verifyPassword } from '../config/password.js'
 import validator from 'validator'
-
+export const search = async(req,res)=>{
+    try {
+        
+        let { limit = 12, page = 1 } = req.query;
+        limit = parseInt(limit);
+        page = parseInt(page);
+        const options = {
+            attributes:['firstname','surname','email'],
+            order:[['id','ASC']]
+        };
+        if (limit !== -1) {
+            options.limit = limit;
+            options.offset = (page - 1) * limit;
+        }
+        
+        const { count, rows } = await User.findAndCountAll(options);
+        return res.status(200).json({
+            data:rows,
+            total:count,
+            limit:limit,
+            page:page
+        })
+    } catch (error) {
+        return res.status(500).json({message:'There was an error try again'})
+    }
+}
 export const getById = async (req, res) => {
     try {
 

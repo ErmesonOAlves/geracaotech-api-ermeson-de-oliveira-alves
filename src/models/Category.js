@@ -17,7 +17,8 @@ Category.init({
     },
     use_in_menu: {
         type: DataTypes.BOOLEAN,
-         defaultValue: 0
+         defaultValue: 0,
+         allowNull:true
     }
 },
     {

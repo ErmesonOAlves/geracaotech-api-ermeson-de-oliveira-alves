@@ -14,8 +14,10 @@ export const search = async (req, res) => {
       })
     }
 
-    const options = {}
-
+ const options = {
+            attributes:['id','name','slug','use_in_menu'],
+            order:[['id','ASC']]
+        };
     if (fields) {
       options.attributes = fields.split(',')
     }
