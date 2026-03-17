@@ -1,4 +1,4 @@
-import Category from '../models/Category.js'
+import Category from '../../models/Category.js'
 import { Op } from 'sequelize'
 export const search = async ({ limit, page, fields, use_in_menu }) => {
     const options = {

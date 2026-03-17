@@ -63,7 +63,9 @@ test('Should create a user', async () => {
     }
     const res = await request(app).post('/v1/user').send(randomUser)
     expect(res.status).toBe(201);
-    expect(res.body.success).toBe(true)
+    expect(res.body).toHaveProperty('firstname')
+    expect(res.body).toHaveProperty('surname')
+    expect(res.body).toHaveProperty('email')
 })
 test('Should fail when creating a user with an invalid email', async () => {
     const randomUser = {
@@ -117,7 +119,7 @@ test('Should fail when creating a user with an existing email', async () => {
     const res = await request(app).post('/v1/user').send({
         firstname: 'Garapaxxxxasdasd',
         surname: 'Da silvaxxxa',
-        email: 'marlin56@yahoo.com',
+        email: 'lucas.mendes@email.com',
         password: '123456789',
         confirmpassword: '123456789'
     })

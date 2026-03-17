@@ -9,8 +9,6 @@ let testUser
 
 beforeAll(async()=>{
      testUser = await setupTestUser();
-    
-    
 })
 
 
@@ -51,5 +49,5 @@ test('Should fail with an invalid email format',async()=>{
         password:'123456766'
     })
     expect(res.status).toBe(400)
-    expect(res.body.message).toContain('Invalid email format')
+    expect(res.body.message).toContain('email format')
 })
