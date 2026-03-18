@@ -20,7 +20,6 @@ beforeAll(async () => {
     const testUser = await setupTestUser();
     authToken = await getAuthToken(testUser.email, testUser.password)
 
-    //capturando o ID, pois no post nem no get retorno o ID
     const userInDatabase = await User.findOne({ where: { email: testUser.email } })
     createdUserId = userInDatabase.id;
     

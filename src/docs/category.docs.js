@@ -1,9 +1,9 @@
 /**
      * @swagger
-     * /v1/product/search:
+     * /v1/category/search:
      *   get:
-     *     summary: Search all products
-     *     tags: [Product]
+     *     summary: Search all categories
+     *     tags: [Category]
      *     security: []
      *     parameters:
      *       - in: query
@@ -20,7 +20,7 @@
      *         description: search page
      *     responses:
      *       200:
-     *         description: List of products
+     *         description: List of categories
      *         content:
      *           application/json:
      *             schema:
@@ -28,21 +28,22 @@
      *               properties:
      *                 total:
      *                   type: integer
-     *                 products:
+     *                 categories:
      *                   type: array
      *                   items:
-     *                     $ref: '#/components/schemas/Product'
+     *                     $ref: '#/components/schemas/Category'
      *       400:
      *         description: limit and page must be numbers
      *       500:
      *         description: Internal server error
      */
-     /**
+    
+    /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/category/{id}:
      *   get:
-     *     summary: Search product by ID
-     *     tags: [Product]
+     *     summary: Search category by ID
+     *     tags: [Category]
      *     security: []
      *     parameters:
      *       - in: path
@@ -50,40 +51,41 @@
      *         required: true
      *         schema:
      *           type: integer
-     *         description: product id
+     *         description: ID category
      *     responses:
      *       200:
-     *         description: Product found
+     *         description: Category found
      *         content:
      *           application/json:
      *             schema:
-     *               $ref: '#/components/schemas/Product'
+     *               $ref: '#/components/schemas/Category'
      *       400:
      *         description: Invalid ID
      *       404:
-     *         description: Product not found
+     *         description: Category not found
      *       500:
      *         description: Internal server error
      */
-    /**
+
+/**
      * @swagger
-     * /v1/product:
+     * /v1/category:
      *   post:
-     *     summary: Create a Product
-     *     tags: [Product]
+     *     summary: Create a Category
+     *     tags: [Category]
      *     requestBody:
      *       required: true
      *       content:
      *         application/json:
      *           schema:
-     *             $ref: '#/components/schemas/ProductCreate'
+     *             $ref: '#/components/schemas/CategoryCreate'
      *     responses:
      *       201:
-     *         description: Product created Successfully
+     *         description: Category created Successfully
      *         content:
      *           application/json:
      *             schema:
-     *               $ref: '#/components/schemas/Product'
+     *               $ref: '#/components/schemas/Category'
      *       400:
      *         description: Invalid data 
      *       500:
@@ -91,10 +93,10 @@
      */
 /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/category/{id}:
      *   put:
-     *     summary: Update product 
-     *     tags: [Product]
+     *     summary: Update category 
+     *     tags: [Category]
      *     parameters:
      *       - in: path
      *         name: id
@@ -106,39 +108,40 @@
      *       content:
      *         application/json:
      *           schema:
-     *             $ref: '#/components/schemas/ProductUpdate'
+     *             $ref: '#/components/schemas/CategoryUpdate'
      *     responses:
      *       204:
-     *         description: Product updated
+     *         description: Category updated
      *       400:
      *         description: Invalid ID or invalid data
      *       401:
      *         description: Token must be provided
      *       404:
-     *         description: Product not found
+     *         description: Category not found
      *       500:
      *         description: Internal server error
      */
 /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/category/{id}:
      *   delete:
-     *     summary: Delete a product 
-     *     tags: [Product]
+     *     summary: Delete a category 
+     *     tags: [Category]
      *     parameters:
      *       - in: path
      *         name: id
      *         required: true
      *         schema:
      *           type: integer
-     *         description: Product id to be deleted
      *     responses:
      *       204:
-     *         description: Product deleted
+     *         description: Category deleted
      *       400:
      *         description: Invalid ID
+     *       401:
+     *         description: Token must be provided
      *       404:
-     *         description: Product not found
+     *         description: Category not found
      *       500:
      *         description: Internal server error
      */

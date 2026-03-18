@@ -5,7 +5,7 @@ export const hashPassword = async (password) => {
 
   return await argon2.hash(password + pepper, {
     type: argon2.argon2id,
-    memoryCost: 2 ** 16, // 65536 KB = 64MB
+    memoryCost: 2 ** 16,
     timeCost: 3,
     parallelism: 1
   })

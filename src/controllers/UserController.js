@@ -16,7 +16,7 @@ export const search = async (req, res) => {
         const { status, body } = await UserService.search({limit,page,fields});
       return res.status(status).json(body)
     } catch (error) {
-        console.error(error); // Log para debug
+        console.error(error);
         return res.status(500).json({ message: 'There was an error try again' })
     }
 }
@@ -29,7 +29,7 @@ export const getById = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message:
-                error.message
+                "Internal server error"
         })
     }
 }
@@ -84,7 +84,7 @@ export const remove = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        console.log("BODY RECEBIDO NO CONTROLLER:", req.body); // Verifique se o body não está vazio
+        
         const { email, password } = req.body
         if (!email || !password) {
             return res.status(400).json({

@@ -1,9 +1,40 @@
-/**
+    /**
      * @swagger
-     * /v1/product/search:
+     * /v1/user/token:
+     *   post:
+     *     summary: Generates a JWT TOKEN for authentication
+     *     tags: [Auth]
+     *     security: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/UserTokenRequest'
+     *     responses:
+     *       200:
+     *         description: token generated with success
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 token:
+     *                   type: string
+     *       400:
+     *         description: Email is required or invalid email format
+     *       401:
+     *         description: Invalid credentials
+     *       500:
+     *         description: Internal server error
+     */
+
+    /**
+     * @swagger
+     * /v1/user/search:
      *   get:
-     *     summary: Search all products
-     *     tags: [Product]
+     *     summary: Search all users
+     *     tags: [User]
      *     security: []
      *     parameters:
      *       - in: query
@@ -20,7 +51,7 @@
      *         description: search page
      *     responses:
      *       200:
-     *         description: List of products
+     *         description: List of users
      *         content:
      *           application/json:
      *             schema:
@@ -28,21 +59,22 @@
      *               properties:
      *                 total:
      *                   type: integer
-     *                 products:
+     *                 users:
      *                   type: array
      *                   items:
-     *                     $ref: '#/components/schemas/Product'
+     *                     $ref: '#/components/schemas/User'
      *       400:
      *         description: limit and page must be numbers
      *       500:
      *         description: Internal server error
      */
-     /**
+
+    /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/user/{id}:
      *   get:
-     *     summary: Search product by ID
-     *     tags: [Product]
+     *     summary: Search user by ID
+     *     tags: [User]
      *     security: []
      *     parameters:
      *       - in: path
@@ -50,51 +82,56 @@
      *         required: true
      *         schema:
      *           type: integer
-     *         description: product id
+     *         description: ID user
      *     responses:
      *       200:
-     *         description: Product found
+     *         description: User found
      *         content:
      *           application/json:
      *             schema:
-     *               $ref: '#/components/schemas/Product'
+     *               $ref: '#/components/schemas/User'
      *       400:
      *         description: Invalid ID
      *       404:
-     *         description: Product not found
+     *         description: User not found
      *       500:
      *         description: Internal server error
      */
     /**
      * @swagger
-     * /v1/product:
+     * /v1/user:
      *   post:
-     *     summary: Create a Product
-     *     tags: [Product]
+     *     summary: Create a User
+     *     tags: [User]
+     *     security: []
      *     requestBody:
      *       required: true
      *       content:
      *         application/json:
      *           schema:
-     *             $ref: '#/components/schemas/ProductCreate'
+     *             $ref: '#/components/schemas/UserCreate'
      *     responses:
      *       201:
-     *         description: Product created Successfully
+     *         description: User created Successfully
      *         content:
      *           application/json:
      *             schema:
-     *               $ref: '#/components/schemas/Product'
+     *               $ref: '#/components/schemas/User'
      *       400:
-     *         description: Invalid data 
+     *         description: Invalid data or password
+     *       409:
+     *         description: Email already exists
      *       500:
      *         description: Internal server error
      */
-/**
+
+
+    /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/user/{id}:
      *   put:
-     *     summary: Update product 
-     *     tags: [Product]
+     *     summary: Update user 
+     *     tags: [User]
      *     parameters:
      *       - in: path
      *         name: id
@@ -106,39 +143,42 @@
      *       content:
      *         application/json:
      *           schema:
-     *             $ref: '#/components/schemas/ProductUpdate'
+     *             $ref: '#/components/schemas/UserUpdate'
      *     responses:
      *       204:
-     *         description: Product updated
+     *         description: User updated
      *       400:
      *         description: Invalid ID or invalid data
      *       401:
      *         description: Token must be provided
      *       404:
-     *         description: Product not found
+     *         description: User not found
+     *       409:
+     *         description: Email already exists
      *       500:
      *         description: Internal server error
      */
-/**
+    /**
      * @swagger
-     * /v1/product/{id}:
+     * /v1/user/{id}:
      *   delete:
-     *     summary: Delete a product 
-     *     tags: [Product]
+     *     summary: Delete a user 
+     *     tags: [User]
      *     parameters:
      *       - in: path
      *         name: id
      *         required: true
      *         schema:
      *           type: integer
-     *         description: Product id to be deleted
      *     responses:
      *       204:
-     *         description: Product deleted
+     *         description: User deleted
      *       400:
      *         description: Invalid ID
+     *       401:
+     *         description: Token must be provided
      *       404:
-     *         description: Product not found
+     *         description: User not found
      *       500:
      *         description: Internal server error
      */

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>API Tester - E-commerce</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #0f172a; color: #e2e8f0; display: flex; height: 100vh; overflow: hidden; }
+  nav { width: 200px; background: #1e293b; padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
+  nav h2 { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px; margin-top: 12px; }
+  nav button { display: block; width: 100%; text-align: left; padding: 8px 16px; background: none; border: none; color: #cbd5e1; cursor: pointer; font-size: 13px; }
+  nav button:hover, nav button.active { background: #334155; color: #fff; }
+  main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  header { background: #1e293b; padding: 12px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #334155; }
+  header span { font-size: 12px; color: #94a3b8; }
+  #token-display { font-size: 11px; color: #4ade80; background: #052e16; padding: 4px 8px; border-radius: 4px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .content { flex: 1; display: flex; overflow: hidden; }
+  .form-panel { width: 380px; padding: 20px; overflow-y: auto; border-right: 1px solid #334155; }
+  .form-panel h3 { font-size: 14px; margin-bottom: 16px; color: #f1f5f9; }
+  label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 4px; margin-top: 10px; }
+  input, textarea, select { width: 100%; padding: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 13px; }
+  textarea { resize: vertical; min-height: 80px; font-family: monospace; }
+  button.btn { margin-top: 16px; padding: 10px 20px; background: #3b82f6; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 13px; width: 100%; }
+  button.btn:hover { background: #2563eb; }
+  button.btn.danger { background: #ef4444; }
+  button.btn.danger:hover { background: #dc2626; }
+  .response-panel { flex: 1; padding: 20px; overflow-y: auto; }
+  .response-panel h3 { font-size: 14px; margin-bottom: 12px; color: #f1f5f9; }
+  pre { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 16px; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  .status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
+  .status.ok { background: #052e16; color: #4ade80; }
+  .status.err { background: #450a0a; color: #f87171; }
+  .hint { font-size: 11px; color: #64748b; margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <nav-section>
+    <h2>Auth</h2>
+    <button onclick="show('login')">🔑 Login</button>
+  </nav-section>
+  <nav-section>
+    <h2>Usuários</h2>
+    <button onclick="show('user-create')">➕ Criar</button>
+    <button onclick="show('user-search')">🔍 Listar</button>
+    <button onclick="show('user-get')">👤 Buscar por ID</button>
+    <button onclick="show('user-update')">✏️ Atualizar</button>
+    <button onclick="show('user-delete')">🗑️ Deletar</button>
+  </nav-section>
+  <nav-section>
+    <h2>Categorias</h2>
+    <button onclick="show('cat-create')">➕ Criar</button>
+    <button onclick="show('cat-search')">🔍 Listar</button>
+    <button onclick="show('cat-get')">📂 Buscar por ID</button>
+    <button onclick="show('cat-update')">✏️ Atualizar</button>
+    <button onclick="show('cat-delete')">🗑️ Deletar</button>
+  </nav-section>
+  <nav-section>
+    <h2>Produtos</h2>
+    <button onclick="show('prod-create')">➕ Criar</button>
+    <button onclick="show('prod-search')">🔍 Listar</button>
+    <button onclick="show('prod-get')">🛍️ Buscar por ID</button>
+    <button onclick="show('prod-update')">✏️ Atualizar</button>
+    <button onclick="show('prod-delete')">🗑️ Deletar</button>
+  </nav-section>
+</nav>
+
+<main>
+  <header>
+    <span>Base URL:</span>
+    <input id="base-url" value="http://localhost:3099" style="width:220px;padding:4px 8px;font-size:12px;">
+    <span>Token:</span>
+    <div id="token-display">Nenhum token</div>
+    <button onclick="clearToken()" style="background:#334155;border:none;color:#94a3b8;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:11px;">Limpar</button>
+  </header>
+
+  <div class="content">
+    <div class="form-panel" id="form-panel">
+      <p style="color:#64748b;font-size:13px;">Selecione uma rota no menu.</p>
+    </div>
+    <div class="response-panel">
+      <h3>Resposta</h3>
+      <div id="status-badge"></div>
+      <pre id="response">Aguardando requisição...</pre>
+    </div>
+  </div>
+</main>
+
+<script>
+let token = '';
+
+const forms = {
+  login: {
+    title: '🔑 POST /v1/user/token',
+    fields: [
+      { id: 'email', label: 'Email', type: 'text', placeholder: 'usuario@email.com' },
+      { id: 'password', label: 'Senha', type: 'password', placeholder: 'senha123' }
+    ],
+    action: async (f, base) => {
+      const r = await api('POST', `${base}/v1/user/token`, { email: f.email, password: f.password });
+      if (r.data?.token) { token = r.data.token; document.getElementById('token-display').textContent = token; }
+      return r;
+    }
+  },
+  'user-create': {
+    title: '➕ POST /v1/user',
+    fields: [
+      { id: 'firstname', label: 'Nome', type: 'text', placeholder: 'João' },
+      { id: 'surname', label: 'Sobrenome', type: 'text', placeholder: 'Silva' },
+      { id: 'email', label: 'Email', type: 'text', placeholder: 'joao@email.com' },
+      { id: 'password', label: 'Senha (min 8)', type: 'password', placeholder: '12345678' },
+      { id: 'confirmpassword', label: 'Confirmar Senha', type: 'password', placeholder: '12345678' }
+    ],
+    action: (f, base) => api('POST', `${base}/v1/user`, f)
+  },
+  'user-search': {
+    title: '🔍 GET /v1/user/search',
+    fields: [
+      { id: 'limit', label: 'Limit', type: 'text', placeholder: '12' },
+      { id: 'page', label: 'Page', type: 'text', placeholder: '1' }
+    ],
+    action: (f, base) => api('GET', `${base}/v1/user/search?limit=${f.limit||12}&page=${f.page||1}`)
+  },
+  'user-get': {
+    title: '👤 GET /v1/user/:id  🔒',
+    fields: [{ id: 'id', label: 'ID do Usuário', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('GET', `${base}/v1/user/${f.id}`, null, true)
+  },
+  'user-update': {
+    title: '✏️ PUT /v1/user/:id  🔒',
+    fields: [
+      { id: 'id', label: 'ID do Usuário', type: 'text', placeholder: '1' },
+      { id: 'firstname', label: 'Nome', type: 'text', placeholder: 'João' },
+      { id: 'surname', label: 'Sobrenome', type: 'text', placeholder: 'Santos' },
+      { id: 'email', label: 'Email', type: 'text', placeholder: 'novo@email.com' }
+    ],
+    action: (f, base) => {
+      const { id, ...body } = f;
+      Object.keys(body).forEach(k => { if (!body[k]) delete body[k]; });
+      return api('PUT', `${base}/v1/user/${id}`, body, true);
+    }
+  },
+  'user-delete': {
+    title: '🗑️ DELETE /v1/user/:id  🔒',
+    fields: [{ id: 'id', label: 'ID do Usuário', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('DELETE', `${base}/v1/user/${f.id}`, null, true),
+    danger: true
+  },
+  'cat-create': {
+    title: '➕ POST /v1/category  🔒',
+    fields: [
+      { id: 'name', label: 'Nome', type: 'text', placeholder: 'Eletrônicos' },
+      { id: 'slug', label: 'Slug', type: 'text', placeholder: 'eletronicos' },
+      { id: 'use_in_menu', label: 'Usar no Menu (true/false)', type: 'text', placeholder: 'true' }
+    ],
+    action: (f, base) => api('POST', `${base}/v1/category`, { ...f, use_in_menu: f.use_in_menu === 'true' }, true)
+  },
+  'cat-search': {
+    title: '🔍 GET /v1/category/search',
+    fields: [
+      { id: 'limit', label: 'Limit', type: 'text', placeholder: '12' },
+      { id: 'page', label: 'Page', type: 'text', placeholder: '1' },
+      { id: 'use_in_menu', label: 'use_in_menu (true/false, opcional)', type: 'text', placeholder: '' }
+    ],
+    action: (f, base) => {
+      let url = `${base}/v1/category/search?limit=${f.limit||12}&page=${f.page||1}`;
+      if (f.use_in_menu) url += `&use_in_menu=${f.use_in_menu}`;
+      return api('GET', url);
+    }
+  },
+  'cat-get': {
+    title: '📂 GET /v1/category/:id',
+    fields: [{ id: 'id', label: 'ID da Categoria', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('GET', `${base}/v1/category/${f.id}`)
+  },
+  'cat-update': {
+    title: '✏️ PUT /v1/category/:id  🔒',
+    fields: [
+      { id: 'id', label: 'ID da Categoria', type: 'text', placeholder: '1' },
+      { id: 'name', label: 'Nome', type: 'text', placeholder: 'Eletrônicos' },
+      { id: 'slug', label: 'Slug', type: 'text', placeholder: 'eletronicos' },
+      { id: 'use_in_menu', label: 'Usar no Menu (true/false)', type: 'text', placeholder: 'true' }
+    ],
+    action: (f, base) => {
+      const { id, ...body } = f;
+      return api('PUT', `${base}/v1/category/${id}`, { ...body, use_in_menu: body.use_in_menu === 'true' }, true);
+    }
+  },
+  'cat-delete': {
+    title: '🗑️ DELETE /v1/category/:id  🔒',
+    fields: [{ id: 'id', label: 'ID da Categoria', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('DELETE', `${base}/v1/category/${f.id}`, null, true),
+    danger: true
+  },
+  'prod-create': {
+    title: '➕ POST /v1/product  🔒',
+    fields: [
+      { id: 'name', label: 'Nome', type: 'text', placeholder: 'Notebook Gamer' },
+      { id: 'slug', label: 'Slug', type: 'text', placeholder: 'notebook-gamer' },
+      { id: 'price', label: 'Preço', type: 'text', placeholder: '3500' },
+      { id: 'price_with_discount', label: 'Preço c/ Desconto', type: 'text', placeholder: '3200' },
+      { id: 'stock', label: 'Estoque', type: 'text', placeholder: '10' },
+      { id: 'description', label: 'Descrição', type: 'text', placeholder: 'Notebook para jogos' },
+      { id: 'enabled', label: 'Habilitado (true/false)', type: 'text', placeholder: 'true' },
+      { id: 'category_ids', label: 'IDs de Categorias (ex: 1,2)', type: 'text', placeholder: '1' },
+      { id: 'images', label: 'Imagens (JSON)', type: 'textarea', placeholder: '[{"content":"https://exemplo.com/img.jpg"}]' },
+      { id: 'options', label: 'Opções (JSON)', type: 'textarea', placeholder: '[{"title":"Cor","shape":"square","radius":0,"type":"text","values":["Preto"]}]' }
+    ],
+    action: (f, base) => {
+      const body = {
+        name: f.name, slug: f.slug,
+        price: parseFloat(f.price), price_with_discount: parseFloat(f.price_with_discount),
+        stock: parseInt(f.stock) || 0, description: f.description,
+        enabled: f.enabled === 'true',
+        category_ids: f.category_ids ? f.category_ids.split(',').map(Number) : [],
+        images: f.images ? JSON.parse(f.images) : [],
+        options: f.options ? JSON.parse(f.options) : []
+      };
+      return api('POST', `${base}/v1/product`, body, true);
+    }
+  },
+  'prod-search': {
+    title: '🔍 GET /v1/product/search',
+    fields: [
+      { id: 'limit', label: 'Limit', type: 'text', placeholder: '12' },
+      { id: 'page', label: 'Page', type: 'text', placeholder: '1' },
+      { id: 'match', label: 'Match (busca por nome/desc)', type: 'text', placeholder: '' },
+      { id: 'price_range', label: 'Price Range (ex: 100-5000)', type: 'text', placeholder: '' },
+      { id: 'category_ids', label: 'Category IDs (ex: 1,2)', type: 'text', placeholder: '' }
+    ],
+    action: (f, base) => {
+      let url = `${base}/v1/product/search?limit=${f.limit||12}&page=${f.page||1}`;
+      if (f.match) url += `&match=${f.match}`;
+      if (f.price_range) url += `&price-range=${f.price_range}`;
+      if (f.category_ids) url += `&category_ids=${f.category_ids}`;
+      return api('GET', url);
+    }
+  },
+  'prod-get': {
+    title: '🛍️ GET /v1/product/:id',
+    fields: [{ id: 'id', label: 'ID do Produto', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('GET', `${base}/v1/product/${f.id}`)
+  },
+  'prod-update': {
+    title: '✏️ PUT /v1/product/:id  🔒',
+    fields: [
+      { id: 'id', label: 'ID do Produto', type: 'text', placeholder: '1' },
+      { id: 'name', label: 'Nome', type: 'text', placeholder: 'Notebook Gamer Pro' },
+      { id: 'slug', label: 'Slug', type: 'text', placeholder: 'notebook-gamer-pro' },
+      { id: 'price', label: 'Preço', type: 'text', placeholder: '3800' },
+      { id: 'price_with_discount', label: 'Preço c/ Desconto', type: 'text', placeholder: '3500' },
+      { id: 'stock', label: 'Estoque', type: 'text', placeholder: '15' },
+      { id: 'description', label: 'Descrição', type: 'text', placeholder: '' },
+      { id: 'enabled', label: 'Habilitado (true/false)', type: 'text', placeholder: 'true' },
+      { id: 'category_ids', label: 'IDs de Categorias (ex: 1,2)', type: 'text', placeholder: '' },
+      { id: 'images', label: 'Imagens (JSON, opcional)', type: 'textarea', placeholder: '[{"content":"https://exemplo.com/img.jpg"}]' },
+      { id: 'options', label: 'Opções (JSON, opcional)', type: 'textarea', placeholder: '' }
+    ],
+    action: (f, base) => {
+      const { id, ...rest } = f;
+      const body = {
+        name: rest.name, slug: rest.slug,
+        price: parseFloat(rest.price), price_with_discount: parseFloat(rest.price_with_discount),
+        stock: parseInt(rest.stock) || 0, description: rest.description,
+        enabled: rest.enabled === 'true',
+        category_ids: rest.category_ids ? rest.category_ids.split(',').map(Number) : [],
+        images: rest.images ? JSON.parse(rest.images) : [],
+        options: rest.options ? JSON.parse(rest.options) : []
+      };
+      return api('PUT', `${base}/v1/product/${id}`, body, true);
+    }
+  },
+  'prod-delete': {
+    title: '🗑️ DELETE /v1/product/:id  🔒',
+    fields: [{ id: 'id', label: 'ID do Produto', type: 'text', placeholder: '1' }],
+    action: (f, base) => api('DELETE', `${base}/v1/product/${f.id}`, null, true),
+    danger: true
+  }
+};
+
+function show(key) {
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const cfg = forms[key];
+  const panel = document.getElementById('form-panel');
+
+  const fieldsHtml = cfg.fields.map(f => {
+    const el = f.type === 'textarea'
+      ? `<textarea id="f-${f.id}" placeholder="${f.placeholder}"></textarea>`
+      : `<input id="f-${f.id}" type="${f.type}" placeholder="${f.placeholder}">`;
+    return `<label>${f.label}</label>${el}`;
+  }).join('');
+
+  panel.innerHTML = `
+    <h3>${cfg.title}</h3>
+    ${fieldsHtml}
+    <button class="btn ${cfg.danger ? 'danger' : ''}" onclick="submit('${key}')">Enviar</button>
+    <p class="hint" style="margin-top:8px;">🔒 = requer token JWT</p>
+  `;
+}
+
+async function submit(key) {
+  const cfg = forms[key];
+  const base = document.getElementById('base-url').value.replace(/\/$/, '');
+  const f = {};
+  cfg.fields.forEach(field => {
+    f[field.id] = document.getElementById(`f-${field.id}`).value.trim();
+  });
+
+  document.getElementById('response').textContent = 'Carregando...';
+  document.getElementById('status-badge').innerHTML = '';
+
+  try {
+    const result = await cfg.action(f, base);
+    const badge = document.getElementById('status-badge');
+    const isOk = result.status >= 200 && result.status < 300;
+    badge.innerHTML = `<span class="status ${isOk ? 'ok' : 'err'}">${result.status} ${result.statusText}</span>`;
+    document.getElementById('response').textContent =
+      result.data !== null ? JSON.stringify(result.data, null, 2) : '(sem corpo — sucesso)';
+  } catch (e) {
+    document.getElementById('response').textContent = 'Erro de rede: ' + e.message;
+  }
+}
+
+async function api(method, url, body = null, auth = false) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth && token) headers['Authorization'] = `Bearer ${token}`;
+
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+
+  const res = await fetch(url, opts);
+  let data = null;
+  const text = await res.text();
+  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+  return { status: res.status, statusText: res.statusText, data };
+}
+
+function clearToken() {
+  token = '';
+  document.getElementById('token-display').textContent = 'Nenhum token';
+}
+</script>
+</body>
+</html>

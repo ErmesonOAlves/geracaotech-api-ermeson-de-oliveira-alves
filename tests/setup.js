@@ -41,15 +41,15 @@ export const baseProduct = {
     images: [
         {
             type: "image/png",
-            content: "base64 da imagem 1"
+            path: "base64 da imagem 1"
         },
         {
             type: "image/png",
-            content: "base64 da imagem 2"
+            path: "base64 da imagem 2"
         },
         {
             type: "image/jpg",
-            content: "base64 da imagem 3"
+            path: "base64 da imagem 3"
         }
     ],
     options: [
